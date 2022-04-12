@@ -51,7 +51,7 @@ const syncInvoice = async (invoice: any) => {
     const data = {
       deliveryDetail: {
         status: deliveryStatus,
-        price: ghtkOrder?.fee_ship,
+        price: invoice.invoiceDelivery?.price ? ghtkOrder?.fee_ship : undefined,
         usingPriceCod: invoice.invoiceDelivery.usingPriceCod,
         expectedDelivery: deliveryDate,
         partnerDelivery: partnerDelivery
