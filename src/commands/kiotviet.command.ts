@@ -6,9 +6,10 @@ import * as kiotvietService from '../services/kiotviet.service';
 import { KIOTVIET_INVOICE_STATUS, VN_TIME_FORMAT } from '../config/constant';
 
 export const kiotvietCommand = (): Command => {
-  const kiotviet = new Command('kiotviet');
+  const kiotviet = new Command('kiotviet').description('manage, sync invoice, order,...');
   kiotviet
     .command('token')
+    .description('get, set access token')
     .option('-g, --get', 'Get access token')
     .option('-s, --set', 'Save access token into .env')
     .action(async (options) => {
@@ -17,6 +18,7 @@ export const kiotvietCommand = (): Command => {
 
   kiotviet
     .command('get')
+    .description('get invoice information')
     .option('-c, --code <value>', 'Kiotviet invoice code')
     .action(async (options) => {
       getCommand(options);
@@ -24,10 +26,11 @@ export const kiotvietCommand = (): Command => {
 
   kiotviet
     .command('sync')
+    .description('sync kiotviet invoice with ghtk order')
     .option('-c, --code <value>', 'Kiotviet invoice code')
-    .addOption(new Option('-d, --date <value>', 'Purchase Date').conflicts('code'))
-    .addOption(new Option('-f, --from <value>', 'From Purchase Date').conflicts('code').conflicts('date'))
-    .addOption(new Option('-t, --to <value>', 'To Purchase Date').conflicts('code').conflicts('date'))
+    .addOption(new Option('-d, --date <yyyy-MM-dd>', 'Purchase Date').conflicts('code'))
+    .addOption(new Option('-f, --from <yyyy-MM-dd>', 'From Purchase Date').conflicts('code').conflicts('date'))
+    .addOption(new Option('-t, --to <yyyy-MM-dd>', 'To Purchase Date').conflicts('code').conflicts('date'))
     .action(async (options) => {
       syncCommand(options);
     });

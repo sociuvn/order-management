@@ -22,10 +22,10 @@ program
 
 program
   .name('Orders Management CLI')
-  .description('CLI to manage orders')
+  .description('CLI to manage invoices, orders')
   .version('0.0.1');
 
-program.addCommand(ghtkCommand(), {});
+program.addCommand(ghtkCommand());
 program.addCommand(kiotvietCommand());
 program.showHelpAfterError('(add --help for additional information)');
 program.showSuggestionAfterError();
