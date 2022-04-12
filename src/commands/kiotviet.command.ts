@@ -1,31 +1,33 @@
 import { Command, Option } from 'commander';
 import { setEnvValue } from '../util/env.util';
-import { info, log } from '../util/console';
-import { getAccessToken, getOrder as getKiotvietOrder, getOrders, mapOrderStatus, updateOrder } from '../util/kiotviet.util';
-import { getOrder as getGHTKOrder } from '../util/ghtk.util';
-import { kiotviet } from '../config/kiotviet';
+import { log } from '../util/console';
+import { getAccessToken } from '../util/kiotviet.util';
+import * as kiotvietService from '../services/kiotviet.service';
+import { KIOTVIET_INVOICE_STATUS, VN_TIME_FORMAT } from '../config/constant';
 
 export const kiotvietCommand = (): Command => {
   const kiotviet = new Command('kiotviet');
   kiotviet
     .command('token')
-    .option('-g, --get')
-    .option('-s, --set')
+    .option('-g, --get', 'Get access token')
+    .option('-s, --set', 'Save access token into .env')
     .action(async (options) => {
       tokenCommand(options);
     });
 
   kiotviet
     .command('get')
-    .option('-c, --code <value>')
+    .option('-c, --code <value>', 'Kiotviet invoice code')
     .action(async (options) => {
       getCommand(options);
     });
 
   kiotviet
     .command('sync')
-    .option('-c, --code <value>', 'Kiotviet order code')
+    .option('-c, --code <value>', 'Kiotviet invoice code')
     .addOption(new Option('-d, --date <value>', 'Purchase Date').conflicts('code'))
+    .addOption(new Option('-f, --from <value>', 'From Purchase Date').conflicts('code').conflicts('date'))
+    .addOption(new Option('-t, --to <value>', 'To Purchase Date').conflicts('code').conflicts('date'))
     .action(async (options) => {
       syncCommand(options);
     });
@@ -51,8 +53,7 @@ const tokenCommand = async (options: any) => {
 const getCommand = async (options: any) => {
   try {
     if (options.code) {
-      const order = await getKiotvietOrder(options.code);
-      info(order);
+      await kiotvietService.printInvoiceByCode(options.code);
     }
   } catch (error) {
     console.error(error.message);
@@ -63,41 +64,27 @@ const getCommand = async (options: any) => {
 const syncCommand = async (options: any) => {
   try {
     if (options.code) {
-      log('Start to get kiotviet order data: ' + options.code);
-      const order = await getKiotvietOrder(options.code);
-      const partnerDelivery = order.invoiceDelivery.partnerDelivery;
-      const deliveryCode = order.invoiceDelivery.deliveryCode;
-
-      if (partnerDelivery.code !== kiotviet.partnerDelivery.GHTK) {
-        info('Skip data sync because delivery partner is not be GHTK!');
-        return;
-      }
-
-      log('Start to get GHTK order data: ' + deliveryCode);
-      const ghtkOrder = await getGHTKOrder(deliveryCode);
-      const deliveryDate = ghtkOrder.done_at ? new Date(ghtkOrder.done_at * 1000) : undefined;
-      log('-------');
-      log('Order delivery status: ' + ghtkOrder.status);
-      log('Order delivery date: ' + deliveryDate);
-      log('-------');
-
-      const deliveryStatus = mapOrderStatus(ghtkOrder.status);
-      const data = {
-        deliveryDetail: {
-          status: deliveryStatus,
-          usingPriceCod: order.invoiceDelivery.usingPriceCod,
-          expectedDelivery: deliveryDate,
-          partnerDelivery: partnerDelivery
-        }
-      };
-
-      log('Start to sync order data: ' + options.code);
-      await updateOrder(order.id, data);
+      kiotvietService.syncInvoiceByCode(options.code);
     }
 
-    if (options.date) {
-      const purchaseDate = new Date(`${options.date}T00:00:00+07:00`);
-      const result = await getOrders(3, purchaseDate.toUTCString(), purchaseDate.toUTCString());
+    if (options.date || options.from || options.to) {
+      let fromPurchaseDate;
+      let toPurchaseDate;
+      if (options.date) {
+        fromPurchaseDate = toPurchaseDate = new Date(`${options.date}${VN_TIME_FORMAT}`);
+      }
+
+      if (options.from && !fromPurchaseDate) {
+        fromPurchaseDate = new Date(`${options.from}${VN_TIME_FORMAT}`);
+        toPurchaseDate = options.to ? new Date(`${options.to}${VN_TIME_FORMAT}`) : new Date();
+      }
+
+      if (options.to && !toPurchaseDate) {
+        toPurchaseDate = new Date(`${options.to}${VN_TIME_FORMAT}`);
+        fromPurchaseDate = options.from ? new Date(`${options.from}${VN_TIME_FORMAT}`) : toPurchaseDate;
+      }
+
+      await kiotvietService.syncInvoices(KIOTVIET_INVOICE_STATUS.PROCESSING, fromPurchaseDate, toPurchaseDate);
     }
   } catch (error) {
     console.error(error.message);

@@ -32,7 +32,7 @@ const getAccessToken = async (): Promise<any> => {
   }
 };
 
-const getOrder = async (code: string): Promise<any> => {
+const getInvoice = async (code: string): Promise<any> => {
   const url = `${kiotviet.baseUrl}${kiotviet.getInvoiceByCode}/${code}`;
 
   const options = {
@@ -47,22 +47,26 @@ const getOrder = async (code: string): Promise<any> => {
 
     const response = await fetch(url, options);
     const dataResponse: any = await response.json();
-    if (response.status == 200) {
+    if (response.status === 200) {
       return dataResponse;
+    } else if (response.status === 420) {
+      return undefined;
     } else {
       log(dataResponse);
-      throw new Error('Error when get Kiotviet Order');
+      throw new Error('Error when get Kiotviet Invoice');
     }
   } catch (e) {
     throw e;
   }
 };
 
-const getOrders = async (status: number, fromPurchaseDate: string, toPurchaseDate: string): Promise<any> => {
+const getInvoices = async (status: number, fromPurchaseDate: string, toPurchaseDate: string): Promise<any> => {
   const url = `${kiotviet.baseUrl}${kiotviet.getInvoices}`;
 
   const params = {
-    // status: 3,
+    status: status.toString(),
+    pageSize: '100',
+    includeInvoiceDelivery: 'true',
     fromPurchaseDate: fromPurchaseDate,
     toPurchaseDate: toPurchaseDate
   };
@@ -80,17 +84,17 @@ const getOrders = async (status: number, fromPurchaseDate: string, toPurchaseDat
     const response = await fetch(`${url}?${new URLSearchParams(params).toString()}`, options);
     const dataResponse: any = await response.json();
     if (response.status == 200) {
-      return dataResponse;
+      return dataResponse?.data;
     } else {
       log(dataResponse);
-      throw new Error('Error when get Kiotviet List Order');
+      throw new Error('Error when get Kiotviet List Invoice');
     }
   } catch (e) {
     throw e;
   }
 };
 
-const updateOrder = async (id: string, data: any): Promise<any> => {
+const updateInvoice = async (id: string, data: any): Promise<any> => {
   const url = `${kiotviet.baseUrl}${kiotviet.updateInvoiceById}/${id}`;
 
   const options = {
@@ -110,22 +114,11 @@ const updateOrder = async (id: string, data: any): Promise<any> => {
       return dataResponse;
     } else {
       log(dataResponse);
-      throw new Error('Error when update Kiotviet Order');
+      throw new Error('Error when update Kiotviet Invoice');
     }
   } catch (e) {
     throw e;
   }
 };
 
-const mapOrderStatus = (ghtkOrderStatus: string): number => {
-  switch (ghtkOrderStatus) {
-    case 'Đã giao hàng':
-    case 'Đã giao hàng/Chưa đối soát':
-    case 'Đã đối soát':
-      return 3;
-    default:
-      return 1;
-  }
-};
-
-export { getAccessToken, getOrder, getOrders, updateOrder, mapOrderStatus };
+export { getAccessToken, getInvoice, getInvoices, updateInvoice };
