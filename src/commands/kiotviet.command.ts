@@ -26,7 +26,7 @@ export const kiotvietCommand = (): Command => {
 
   kiotviet
     .command('sync')
-    .description('sync kiotviet invoice with ghtk order')
+    .description('sync kiotviet invoice with ghtk, vnpost order')
     .option('-c, --code <value>', 'Kiotviet invoice code')
     .addOption(new Option('-d, --date <yyyy-MM-dd>', 'Purchase Date').conflicts('code'))
     .addOption(new Option('-f, --from <yyyy-MM-dd>', 'From Purchase Date').conflicts('code').conflicts('date'))

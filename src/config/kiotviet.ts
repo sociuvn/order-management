@@ -10,6 +10,7 @@ export const kiotviet = {
   token: process.env.KIOTVIET_TOKEN,
   partnerDelivery: {
     GHTK: process.env.KIOTVIET_PARTNER_DELIVERY_CODE_GHTK,
-    GHN: process.env.KIOTVIET_PARTNER_DELIVERY_CODE_GHN
+    GHN: process.env.KIOTVIET_PARTNER_DELIVERY_CODE_GHN,
+    VNPOST: process.env.KIOTVIET_PARTNER_DELIVERY_CODE_VNPOST,
   }
 };

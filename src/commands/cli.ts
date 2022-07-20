@@ -4,6 +4,7 @@ import 'dotenv/config';
 import { Command } from 'commander';
 import { ghtkCommand } from './ghtk.command';
 import { kiotvietCommand } from './kiotviet.command';
+import { vnpostCommand } from './vnpost.command';
 
 if (process.env.NODE_ENV === 'production')
   console.debug = () => {};
@@ -26,6 +27,7 @@ program
   .version('0.0.1');
 
 program.addCommand(ghtkCommand());
+program.addCommand(vnpostCommand());
 program.addCommand(kiotvietCommand());
 program.showHelpAfterError('(add --help for additional information)');
 program.showSuggestionAfterError();
