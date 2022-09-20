@@ -55,7 +55,7 @@ const syncInvoice = async (invoice: any) => {
         ...data,
         deliveryDetail: {
           status: deliveryStatus,
-          price: invoice.invoiceDelivery?.price ? ghtkOrder?.fee_ship : undefined,
+          price: ghtkOrder?.fee_ship,
           usingPriceCod: invoice.invoiceDelivery.usingPriceCod,
           expectedDelivery: deliveryDate,
           partnerDelivery: partnerDelivery
@@ -78,7 +78,7 @@ const syncInvoice = async (invoice: any) => {
         ...data,
         deliveryDetail: {
           status: deliveryStatus,
-          price: invoice.invoiceDelivery?.price ? vnpostOrder?.fee_ship : undefined,
+          price: vnpostOrder?.fee_ship,
           usingPriceCod: invoice.invoiceDelivery.usingPriceCod,
           expectedDelivery: deliveryDate,
           partnerDelivery: partnerDelivery
