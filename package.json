@@ -44,7 +44,7 @@
   "devDependencies": {
     "@types/body-parser": "1.19.2",
     "@types/bson": "4.2.0",
-    "@types/chai": "4.3.1",
+    "@types/chai": "4.3.4",
     "@types/compression": "1.7.2",
     "@types/concurrently": "7.0.0",
     "@types/errorhandler": "1.5.0",
@@ -57,7 +57,7 @@
     "@types/winston": "2.4.4",
     "@typescript-eslint/eslint-plugin": "5.30.7",
     "@typescript-eslint/parser": "5.30.7",
-    "chai": "4.3.6",
+    "chai": "4.3.7",
     "concurrently": "7.3.0",
     "eslint": "8.20.0",
     "jest": "28.1.3",
