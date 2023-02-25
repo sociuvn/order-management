@@ -19,6 +19,7 @@
 ## Table of contents
 - [Quick start](#quick-start)
 - [Bugs and feature requests](#bugs-and-feature-requests)
+- [Some commands](#some-commands)
 - [Contributing](#contributing)
 - [Creators](#creators)
 - [Thanks](#thanks)
@@ -27,6 +28,93 @@
 ## Bugs and feature requests
 
 Have a bug or a feature request? Please first read the [issue guidelines](https://github.com/sociuvn/order-management/blob/main/CONTRIBUTING.md) and search for existing and closed issues. If your problem or idea is not addressed yet, [please open a new issue](https://github.com/sociuvn/order-management/issues/new).
+## Some commands
+### Dev
+#### Kiotviet
+
+```console
+# Get order by code
+npm run cli -- ghtk get -c 123456789
+```
+
+#### VNPost
+
+```console
+# Get order by code
+npm run cli -- vnpost get -c EE123456789VN
+
+# Get orders by date
+npm run cli -- vnpost get -d 2023-02-20
+
+# Get orders from the date to current date
+npm run cli -- vnpost get -f 2023-02-20
+
+# Get orders from the date to other date
+npm run cli -- vnpost get -f 2023-02-20 -t 2023-02-23
+
+# Get orders from current date to the date
+npm run cli -- vnpost get -t 2023-02-26
+```
+
+#### Kiotviet
+
+* Token:
+
+```console
+# Get token
+npm run cli -- kiotviet token -g
+
+# Save token into .env
+npm run cli -- kiotviet token -s
+
+# Show and save token into .env
+npm run cli -- kiotviet token -gs
+```
+
+* Branches:
+
+```console
+# Show list branches
+npm run cli -- kiotviet branches list
+```
+
+* Customers:
+
+```console
+# Create customers from VNPost, GHTK orders by date
+npm run cli -- kiotviet customers create -d 2023-02-20
+
+# Create customers from VNPost, GHTK orders from the date to current date
+npm run cli -- kiotviet customers create -f 2023-02-20
+
+# Create customers from VNPost, GHTK orders from the date to other date
+npm run cli -- kiotviet customers create -f 2023-02-20 -t 2023-02-23
+
+# Create customers from VNPost, GHTK orders from current date to the date
+npm run cli -- kiotviet customers create -t 2023-02-26
+```
+
+* Invoices:
+
+```console
+# Get invoice by code
+npm run cli -- kiotviet invoices get -c HD123456
+
+# Sync invoice by code
+npm run cli -- kiotviet invoices sync -c HD123456
+
+# Sync invoices by date
+npm run cli -- kiotviet invoices sync -d 2023-02-20
+
+# Sync invoices from the date to current date
+npm run cli -- kiotviet invoices sync -f 2023-02-20
+
+# Sync invoices from the date to other date
+npm run cli -- kiotviet invoices sync -f 2023-02-20 -t 2023-02-23
+
+# Sync invoices from current date to the date
+npm run cli -- kiotviet invoices sync -t 2023-02-26
+```
 
 ## Creators
 - [lamngockhuong](https://github.com/lamngockhuong/)

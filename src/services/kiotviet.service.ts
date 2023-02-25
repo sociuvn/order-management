@@ -44,6 +44,11 @@ const syncInvoice = async (invoice: any, index = 0) => {
     if (partnerDelivery?.code === kiotviet.partnerDelivery.GHTK) {
       log(`-------------------- [GHTK Order #${index + 1}: ${deliveryCode}] --------------------`);
       const ghtkOrder: Order = await getGHTKOrder(deliveryCode);
+
+      if (!ghtkOrder) {
+        return;
+      }
+
       const deliveryDate = ghtkOrder.doneAt ?? undefined;
       log('🠺 Invoice status: ' + getInvoiceStatusText(invoice.status));
       log('🠺 Order delivery status: ' + ghtkOrder.status);
@@ -66,6 +71,11 @@ const syncInvoice = async (invoice: any, index = 0) => {
     if (partnerDelivery?.code === kiotviet.partnerDelivery.VNPOST) {
       log(`-------------------- [VNPost Order #${index + 1}: ${deliveryCode}] --------------------`);
       const vnpostOrder: Order = await getVNPostOrder(deliveryCode);
+
+      if (!vnpostOrder) {
+        return;
+      }
+
       const deliveryDate = vnpostOrder.doneAt ?? undefined;
       log('🠺 Invoice status: ' + getInvoiceStatusText(invoice.status));
       log('🠺 Order delivery status: ' + vnpostOrder.status);

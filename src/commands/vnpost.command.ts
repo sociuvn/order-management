@@ -16,8 +16,13 @@ export const vnpostCommand = (): Command => {
     .action(async (options) => {
       if (options.code) {
         const order = await getVNPostOrder(options.code);
-        const orderDetail = await getVNPostOrderDetail(order.id);
-        info(orderDetail);
+
+        if (order) {
+          const orderDetail = await getVNPostOrderDetail(order.id);
+          info(orderDetail);
+        } else {
+          info(`❌ Can not find order with code: ${options.code}`);
+        }
       }
 
       if (options.date || options.from || options.to) {

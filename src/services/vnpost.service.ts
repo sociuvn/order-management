@@ -38,7 +38,7 @@ const getOrder = async (condition: string): Promise<Order> => {
   const orders: VNPostListOrder = await getOrdersOfCustomer(data);
 
   const item = orders?.Items[0];
-  return {
+  return item ? {
     id: item.Id,
     statusCode: item.OrderStatusId,
     status: item.OrderStatusName,
@@ -51,7 +51,7 @@ const getOrder = async (condition: string): Promise<Order> => {
     createdAt: new Date(item.CreateTime),
     doneAt: new Date(item.DeliveryTime),
     returnAt: undefined
-  } as Order;
+  } as Order : undefined;
 };
 
 const getOrderDetail = async (id: string): Promise<Order> => {

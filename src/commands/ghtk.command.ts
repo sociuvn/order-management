@@ -14,7 +14,9 @@ export const ghtkCommand = (): Command => {
     .option('-t, --to <yyyy-MM-dd>', 'to date')
     .action(async (options) => {
       if (options.code) {
-        info(await getGHTKOrder(options.code));
+        const order = await getGHTKOrder(options.code);
+        order ? info(await getGHTKOrder(options.code))
+          : info(`❌ Can not find order with code: ${options.code}`);
       }
     });
 
