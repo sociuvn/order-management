@@ -1,6 +1,6 @@
 import { Command } from 'commander';
+import { getGHTKOrder } from '../services/ghtk.service';
 import { info } from '../util/console';
-import { getOrder } from '../util/ghtk.util';
 
 export const ghtkCommand = (): Command => {
   const ghtk = new Command('ghtk').description('manage order, get information,...');
@@ -14,7 +14,7 @@ export const ghtkCommand = (): Command => {
     .option('-t, --to <yyyy-MM-dd>', 'to date')
     .action(async (options) => {
       if (options.code) {
-        info(await getOrder(options.code));
+        info(await getGHTKOrder(options.code));
       }
     });
 

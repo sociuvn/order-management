@@ -2,7 +2,32 @@ import fetch from 'cross-fetch';
 import { ghtk } from '../config/ghtk';
 import { generateQueryString } from './request';
 
-const getOrder = async (id: string): Promise<any> => {
+export class Order {
+  id: string;
+  alias: string;
+  statusCode: number;
+  status: string;
+  fullName: string;
+  phone: string;
+  firstAddress: string;
+  lastAddress: string;
+  pickMoney: number;
+  feeShip: number;
+  returnFee: number;
+  totalFee: number;
+  products: Product[];
+  tags: string[];
+  createdAt: number;
+  doneAt: number;
+  returnAt: number;
+}
+
+export class Product {
+  productName: string;
+  quantity: number;
+}
+
+const getOrder = async (id: string): Promise<Order> => {
   const url = `${ghtk.baseUrl}${ghtk.packageDetail}`;
 
   const params = {
@@ -15,9 +40,7 @@ const getOrder = async (id: string): Promise<any> => {
     }
   };
 
-  let result: any = {
-    order: id
-  };
+  let result: Order;
   try {
 
     const response = await fetch(`${url}?${generateQueryString(params)}`, options);
@@ -27,26 +50,28 @@ const getOrder = async (id: string): Promise<any> => {
       const packageData = data?.Package;
       const tags = packageData?.draft_tags?.map((p: any) => p.name);
       const tracking: any = packageData?.tracking;
-      const products = tracking?.products?.map((p: any) => ({
-        product_name: p.product_name,
+      const products: Product[] = tracking?.products?.map((p: any) => ({
+        productName: p.product_name,
         quantity: p.quantity
-      }));
+      } as Product));
       result = {
-        ...result,
+        id: id,
+        alias: packageData?.alias,
+        statusCode: tracking?.status?.id,
         status: tracking?.status?.name,
-        full_name: tracking?.customer_fullname,
+        fullName: tracking?.customer_fullname,
         phone: tracking.customer_tel,
-        first_address: tracking?.customer_first_address,
-        last_address: tracking?.customer_last_address,
-        pick_money: tracking?.pick_money,
-        fee_ship: packageData?.final_ship_fee,
-        return_fee: packageData?.return_fee,
-        total_fee: tracking?.total_fee,
+        firstAddress: tracking?.customer_first_address,
+        lastAddress: tracking?.customer_last_address,
+        pickMoney: packageData?.pick_money,
+        feeShip: packageData?.final_ship_fee,
+        returnFee: packageData?.return_fee,
+        totalFee: tracking?.total_fee,
         products: products,
         tags: tags,
-        created_at: tracking?.created,
-        done_at: tracking?.done_at,
-        return_at: packageData?.returned_at
+        createdAt: tracking?.created,
+        doneAt: tracking?.done_at,
+        returnAt: packageData?.returned_at
       };
     }
   } catch (e) {

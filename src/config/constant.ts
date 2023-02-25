@@ -1,4 +1,5 @@
 export const VN_TIME_FORMAT = 'T00:00:00+07:00';
+export const UTC_TIME_FORMAT = 'T00:00:00+00:00';
 export const enum KIOTVIET_INVOICE_STATUS {
   COMPLETE = 1,
   CANCEL = 2,

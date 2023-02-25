@@ -1,6 +1,7 @@
 import { Command } from 'commander';
-import { info } from '../util/console';
-import { getOrder } from '../util/vnpost.util';
+import { UTC_TIME_FORMAT } from '../config/constant';
+import { getVNPostOrder, getVNPostOrderDetail, showOrders } from '../services/vnpost.service';
+import { info, log } from '../util/console';
 
 export const vnpostCommand = (): Command => {
   const vnpost = new Command('vnpost').description('manage order, get information,...');
@@ -14,7 +15,23 @@ export const vnpostCommand = (): Command => {
     .option('-t, --to <yyyy-MM-dd>', 'to date')
     .action(async (options) => {
       if (options.code) {
-        info(await getOrder(options.code));
+        const order = await getVNPostOrder(options.code);
+        const orderDetail = await getVNPostOrderDetail(order.id);
+        info(orderDetail);
+      }
+
+      if (options.date || options.from || options.to) {
+        const { date, from, to } = options;
+        let fromPurchaseDate;
+        let toPurchaseDate;
+        if (date) {
+          fromPurchaseDate = toPurchaseDate = new Date(`${date}${UTC_TIME_FORMAT}`);
+        } else {
+          fromPurchaseDate = from ? new Date(`${from}${UTC_TIME_FORMAT}`) : new Date();
+          toPurchaseDate = to ? new Date(`${to}${UTC_TIME_FORMAT}`) : new Date();
+        }
+        log(`From: ${fromPurchaseDate}, to: ${toPurchaseDate}`);
+        await showOrders(fromPurchaseDate, toPurchaseDate);
       }
     });
 

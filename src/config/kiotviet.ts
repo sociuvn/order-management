@@ -4,6 +4,8 @@ export const kiotviet = {
   getInvoices: '/invoices',
   getInvoiceByCode: '/invoices/code',
   updateInvoiceById: '/invoices',
+  customers: '/customers',
+  branches: '/branches',
   clientId: process.env.KIOTVIET_CLIENT_ID,
   clientSecret: process.env.KIOTVIET_SECRET,
   retailer: process.env.KIOTVIET_RETAILER,
@@ -12,5 +14,6 @@ export const kiotviet = {
     GHTK: process.env.KIOTVIET_PARTNER_DELIVERY_CODE_GHTK,
     GHN: process.env.KIOTVIET_PARTNER_DELIVERY_CODE_GHN,
     VNPOST: process.env.KIOTVIET_PARTNER_DELIVERY_CODE_VNPOST,
-  }
+  },
+  branch1: process.env.KIOTVIET_BRANCH1,
 };

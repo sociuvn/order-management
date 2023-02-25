@@ -1,61 +1,113 @@
+import 'reflect-metadata';
+import { Type } from 'class-transformer';
 import fetch from 'cross-fetch';
 import { vnpost } from '../config/vnpost';
+import { transformObject } from './transform';
 
-const getOrder = async (id: string): Promise<any> => {
+export class Order {
+  Id: string;
+  ItemCode: string;
+  CodAmount: number;
+  CodAmountEvaluation: number;
+  CreateTime: string;
+  DeliveryTime: string;
+  LastUpdateTime: string;
+  OrderCode: string;
+  OrderStatusId: number;
+  OrderStatusName: string;
+  PackageContent: string;
+  ReceiverFullname: string;
+  ReceiverInBlacklist: string;
+  ReceiverTel: string;
+  TotalFreightIncludeVat: string;
+  TotalFreightIncludeVatEvaluation: string;
+}
+
+export class OrderDetail extends Order {
+  ReceiverAddress: string;
+  ReceiverDistrictId: string;
+  ReceiverProvinceId: string;
+  ReceiverWardId: string;
+  ReceiverFullAddress: string;
+}
+
+export class ListOrder {
+  Count: number;
+
+  @Type(() => Order)
+  Items: Order[];
+}
+
+export class OrderRequestDto {
+  ChildUserId: string;
+  KeySearch?: string;
+  CreateTimeEnd?: string;
+  CreateTimeStart?: string;
+  OrderByDescending: boolean;
+  PageIndex: number;
+  PageSize: number;
+};
+
+const getOrdersOfCustomer = async (data: OrderRequestDto): Promise<ListOrder> => {
   const url = `${vnpost.baseUrl}${vnpost.getListOrderOfCustomer}`;
-
-  const data = {
-    KeySearch: id,
-    ChildUserId: '',
-    OrderByDescending: true,
-    PageIndex: 0,
-    PageSize: 5,
-  };
-
-  const options = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'h-token': vnpost.token
-    },
-    body: JSON.stringify(data)
-  };
-
-  let result: any = {
-    order: id
-  };
+  let options;
+  let response;
+  let dataResponse;
+  let result;
 
   try {
-
-    const response = await fetch(url, options);
-    if (response.status == 401) {
-      console.log(await response.text());
+    options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'h-token': vnpost.token
+      },
+      body: JSON.stringify(data)
     }
+    response = await fetch(url, options);
 
     if (response.status == 200) {
-      const dataResponse: any = await response.json();
-      const data = dataResponse?.Items[0];
-      result = {
-        ...result,
-        id: data.Id,
-        status_code: data.OrderStatusId,
-        status: data.OrderStatusName,
-        full_name: data.ReceiverFullname,
-        phone: data.ReceiverTel,
-        cod_amount: data.CodAmount,
-        fee_ship: data.TotalFreightIncludeVat,
-        products: data.PackageContent,
-        code: data.OrderCode,
-        created_at: data.CreateTime,
-        done_at: data.DeliveryTime,
-        return_at: data.DeliveryTime
-      };
+      dataResponse = await response.json();
+      result = transformObject(ListOrder, dataResponse);
+    } else {
+      throw Error(`[VNPost] ${await response.text()}`);
     }
   } catch (e) {
-    console.error(e);
+    throw e;
   }
 
   return result;
 };
 
-export { getOrder };
+const getOrder = async (id: string): Promise<OrderDetail> => {
+  const url = `${vnpost.baseUrl}${vnpost.getOrder}`;
+
+  let options: any;
+  let response: any;
+  let dataResponse: any;
+  let result: OrderDetail;
+
+  try {
+    options = {
+      method: 'POST',
+      headers: {
+        'h-token': vnpost.token
+      },
+    };
+
+    response = await fetch(`${url}/${id}`, options);
+
+    if (response.status == 200) {
+      dataResponse = await response.json();
+      result = transformObject(OrderDetail, dataResponse);
+    } else {
+      throw Error(`[VNPost] ${await response.text()}`);
+    }
+  } catch (e) {
+    throw e;
+  }
+
+  return result;
+};
+
+export { getOrdersOfCustomer, getOrder };

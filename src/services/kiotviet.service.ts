@@ -1,15 +1,16 @@
-import { getInvoice as getKiotvietInvoice, getInvoices, updateInvoice } from '../util/kiotviet.util';
-import { getOrder as getGHTKOrder } from '../util/ghtk.util';
-import { getOrder as getVNPOSTOrder } from '../util/vnpost.util';
+import { AddCustomerRequestDto, Branch, Customer, getBranches, getCustomers as getKVCustomers, getInvoice as getKVInvoice, getInvoices as getKVInvoices, Invoice, ListCustomerRequestDto, updateInvoice as updateKVInvoice, createCustomer as createKVCustomer } from '../util/kiotviet.util';
+import { getGHTKOrder } from './ghtk.service';
 import { info, log } from '../util/console';
 import { kiotviet } from '../config/kiotviet';
 import { KIOTVIET_DELIVERY_STATUS, KIOTVIET_INVOICE_STATUS } from '../config/constant';
+import { getVNPostOrder, getVNPostOrderDetail, getVNPostOrders } from './vnpost.service';
+import { Order } from '../dtos/order.dto';
 
 const printInvoiceByCode = async (code: string) => {
   try {
-    log('Start to get kiotviet invoice data: ' + code);
-    const invoice = await getKiotvietInvoice(code);
-    info(invoice ? invoice : 'Can not find this invoice!');
+    log('➥ Start to get kiotviet invoice data: ' + code);
+    const invoice = await getKVInvoice(code);
+    info(invoice ? invoice : '❌ Can not find this invoice!');
   } catch (error) {
     console.error(error.message);
   }
@@ -17,37 +18,36 @@ const printInvoiceByCode = async (code: string) => {
 
 const syncInvoiceByCode = async (code: string) => {
   try {
-    log('Start to get kiotviet invoice data: ' + code);
-    const invoice = await getKiotvietInvoice(code);
+    log('➥ Start to get kiotviet invoice data: ' + code);
+    const invoice = await getKVInvoice(code);
     if (invoice) {
       await syncInvoice(invoice);
     } else {
-      info(`Can not find invoice with code: ${code}`);
+      info(`❌ Can not find invoice with code: ${code}`);
     }
   } catch (error) {
     console.error(error.message);
   }
 };
 
-const syncInvoice = async (invoice: any) => {
+const syncInvoice = async (invoice: any, index = 0) => {
   try {
     const partnerDelivery = invoice.invoiceDelivery?.partnerDelivery;
     const deliveryCode = invoice.invoiceDelivery?.deliveryCode;
 
     if (partnerDelivery?.code !== kiotviet.partnerDelivery.GHTK && partnerDelivery?.code !== kiotviet.partnerDelivery.VNPOST) {
-      info(`Skip data sync for invoice ${invoice.code} because delivery partner is not be GHTK, VNPOST!`);
+      info(`🙃 Skip data sync for invoice ${invoice.code} because delivery partner is not be GHTK, VNPOST!`);
       return;
     }
 
     let data = {};
     if (partnerDelivery?.code === kiotviet.partnerDelivery.GHTK) {
-      log('Start to get GHTK order data: ' + deliveryCode);
-      const ghtkOrder = await getGHTKOrder(deliveryCode);
-      const deliveryDate = ghtkOrder.done_at ? new Date(ghtkOrder.done_at * 1000) : undefined;
-      log('--');
-      log('Invoice status: ' + getInvoiceStatusText(invoice.status));
-      log('Order delivery status: ' + ghtkOrder.status);
-      log('Order delivery date: ' + deliveryDate);
+      log(`-------------------- [GHTK Order #${index + 1}: ${deliveryCode}] --------------------`);
+      const ghtkOrder: Order = await getGHTKOrder(deliveryCode);
+      const deliveryDate = ghtkOrder.doneAt ?? undefined;
+      log('🠺 Invoice status: ' + getInvoiceStatusText(invoice.status));
+      log('🠺 Order delivery status: ' + ghtkOrder.status);
+      log('🠺 Order delivery date: ' + deliveryDate);
       log('--');
 
       const deliveryStatus = toGHTKDeliveryStatus(ghtkOrder.status);
@@ -55,7 +55,7 @@ const syncInvoice = async (invoice: any) => {
         ...data,
         deliveryDetail: {
           status: deliveryStatus,
-          price: ghtkOrder?.fee_ship,
+          price: ghtkOrder?.feeShip,
           usingPriceCod: invoice.invoiceDelivery.usingPriceCod,
           expectedDelivery: deliveryDate,
           partnerDelivery: partnerDelivery
@@ -64,21 +64,20 @@ const syncInvoice = async (invoice: any) => {
     }
 
     if (partnerDelivery?.code === kiotviet.partnerDelivery.VNPOST) {
-      log('Start to get VNPOST order data: ' + deliveryCode);
-      const vnpostOrder = await getVNPOSTOrder(deliveryCode);
-      const deliveryDate = vnpostOrder.done_at ?? undefined;
-      log('--');
-      log('Invoice status: ' + getInvoiceStatusText(invoice.status));
-      log('Order delivery status: ' + vnpostOrder.status);
-      log('Order delivery date: ' + deliveryDate);
+      log(`-------------------- [VNPost Order #${index + 1}: ${deliveryCode}] --------------------`);
+      const vnpostOrder: Order = await getVNPostOrder(deliveryCode);
+      const deliveryDate = vnpostOrder.doneAt ?? undefined;
+      log('🠺 Invoice status: ' + getInvoiceStatusText(invoice.status));
+      log('🠺 Order delivery status: ' + vnpostOrder.status);
+      log('🠺 Order delivery date: ' + deliveryDate);
       log('--');
 
-      const deliveryStatus = toVNPOSTDeliveryStatus(vnpostOrder.status_code);
+      const deliveryStatus = toVNPOSTDeliveryStatus(vnpostOrder.statusCode);
       data = {
         ...data,
         deliveryDetail: {
           status: deliveryStatus,
-          price: vnpostOrder?.fee_ship,
+          price: vnpostOrder?.feeShip,
           usingPriceCod: invoice.invoiceDelivery.usingPriceCod,
           expectedDelivery: deliveryDate,
           partnerDelivery: partnerDelivery
@@ -87,10 +86,10 @@ const syncInvoice = async (invoice: any) => {
     }
 
     if (invoice.status === KIOTVIET_INVOICE_STATUS.PROCESSING || invoice.status === KIOTVIET_INVOICE_STATUS.COMPLETE) {
-      await updateInvoice(invoice.id, data);
-      info('Sync invoice data done: ' + invoice.code);
+      await updateKVInvoice(invoice.id, data);
+      info('✔️  Sync invoice data done: ' + invoice.code);
     } else {
-      info('Can not update data for this invoice');
+      info('❌ Can not update data for this invoice');
     }
   } catch (error) {
     console.error(error.message);
@@ -99,12 +98,108 @@ const syncInvoice = async (invoice: any) => {
 
 const syncInvoices = async (status: number, fromPurchaseDate: Date, toPurchaseDate: Date) => {
   try {
-    const invoices = await getInvoices(status, fromPurchaseDate.toUTCString(), toPurchaseDate.toUTCString());
-    info(`Find ${invoices.length} invoices from ${fromPurchaseDate.toLocaleDateString()} to ${toPurchaseDate.toLocaleDateString()}!`);
+    const invoices: Invoice[] = await getKVInvoices(status, fromPurchaseDate.toUTCString(), toPurchaseDate.toUTCString());
+    info(`🙌 Find ${invoices.length} invoices from ${fromPurchaseDate.toLocaleDateString()} to ${toPurchaseDate.toLocaleDateString()}!`);
 
-    for (const invoice of invoices) {
-      await syncInvoice(invoice);
-      info('--------------------------------------------------------');
+    for (let i = 0; i < invoices.length; i++) {
+      await syncInvoice(invoices[i], i);
+      info('------');
+    }
+    info(`(Total: ${invoices?.length} invoices)`)
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+const listBranches = async () => {
+  try {
+    const branches: Branch[] = await getBranches();
+    branches.forEach((branch, index) => {
+      info(`#${index + 1} Id: ${branch.id} - name: ${branch.branchName} - address: ${branch.address} - contact: ${branch.contactNumber}`);
+      log(branch);
+    });
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+const createCustomers = async (fromPurchaseDate: Date, toPurchaseDate: Date) => {
+  try {
+    createVNPostCustomers(fromPurchaseDate, toPurchaseDate);
+    // TODO createGHTKCustomers(fromPurchaseDate, toPurchaseDate);
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+const createVNPostCustomers = async (fromPurchaseDate: Date, toPurchaseDate: Date) => {
+  try {
+    const orders: Order[] = await getVNPostOrders(fromPurchaseDate.toISOString(), toPurchaseDate.toISOString());
+    info(`🙌 Find ${orders?.length} VNPOST orders from ${fromPurchaseDate.toLocaleDateString()} to ${toPurchaseDate.toLocaleDateString()}!`);
+
+    for (const order of orders) {
+      info(`-------------------- [VNPost Order: ${order.code}] --------------------`);
+      await findAndCreateCustomer(order);
+      info(`------`);
+    }
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+const createGHTKCustomers = async (fromPurchaseDate: Date, toPurchaseDate: Date) => {
+  try {
+    // TODO
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+const findCustomerByPhone = async (phone: string): Promise<Customer> => {
+  let customer: Customer;
+  try {
+    const findDto: ListCustomerRequestDto = {
+      contactNumber: phone
+    }
+    const customers: Customer[] = await getKVCustomers(findDto);
+    if (customers?.length > 0) {
+      customer = customers[0];
+    }
+  } catch (error) {
+    console.error(error.message);
+  }
+
+  return customer;
+};
+
+const createCustomer = async (customer: AddCustomerRequestDto): Promise<Customer> => {
+  try {
+    return await createKVCustomer(customer);
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+const findAndCreateCustomer = async (order: Order) => {
+  try {
+    let customer = await findCustomerByPhone(order.phone);
+    // Call API order detail to get customer address
+    const orderDetail: Order = await getVNPostOrderDetail(order.id);
+
+    if (customer) {
+      info(`🔎 [VNPOST] Phone: ${orderDetail.phone} - Name: ${orderDetail.fullName} - Address: ${orderDetail.address} => [KiotViet] Phone: ${customer.contactNumber} - Name: ${customer.name} - Address: ${customer.address} - Ward: ${customer.wardName || 'None'} - Location: ${customer.locationName || 'None'}`);
+    } else {
+      // Create customer
+      const customerRequest: AddCustomerRequestDto = {
+        name: orderDetail.fullName,
+        contactNumber: orderDetail.phone,
+        address: orderDetail.address,
+        branchId: Number(kiotviet.branch1)
+      }
+      customer = await createCustomer(customerRequest);
+
+      customer ? info(`✔️  [VNPOST] Phone: ${orderDetail.phone} - Name: ${orderDetail.fullName} - Address: ${orderDetail.address} => [KiotViet] Phone: ${customer.contactNumber} - Name: ${customer.name} - Address: ${customer.address} - Ward: ${customer.wardName || 'None'} - Location: ${customer.locationName || 'None'}`)
+        : info('❌ Have the error when creating customer for this order!');
     }
   } catch (error) {
     console.error(error.message);
@@ -148,4 +243,4 @@ const getInvoiceStatusText = (status: KIOTVIET_INVOICE_STATUS) => {
   }
 };
 
-export { printInvoiceByCode, syncInvoiceByCode, syncInvoice, syncInvoices, getInvoiceStatusText };
+export { printInvoiceByCode, syncInvoiceByCode, syncInvoice, syncInvoices, getInvoiceStatusText, createCustomers, listBranches };
