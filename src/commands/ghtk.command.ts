@@ -1,9 +1,24 @@
 import { Command } from 'commander';
+import { setEnvValue } from '../util/env.util';
 import { getGHTKOrder } from '../services/ghtk.service';
 import { info } from '../util/console';
 
 export const ghtkCommand = (): Command => {
   const ghtk = new Command('ghtk').description('manage order, get information,...');
+
+  ghtk
+    .command('token')
+    .description('Set GHTK access token')
+    .option('-s, --set <token>', 'Save access token into .env')
+    .action(async (options) => {
+      try {
+        if (options.set) {
+          setEnvValue('GHTK_TOKEN111', options.set);
+        }
+      } catch (error) {
+        console.error(error.message);
+      }
+    });
 
   ghtk
     .command('get')

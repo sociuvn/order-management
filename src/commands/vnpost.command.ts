@@ -1,10 +1,25 @@
 import { Command } from 'commander';
+import { setEnvValue } from '../util/env.util';
 import { UTC_TIME_FORMAT } from '../config/constant';
 import { getVNPostOrder, getVNPostOrderDetail, showOrders } from '../services/vnpost.service';
 import { info, log } from '../util/console';
 
 export const vnpostCommand = (): Command => {
   const vnpost = new Command('vnpost').description('manage order, get information,...');
+
+  vnpost
+    .command('token')
+    .description('Set VNPost access token')
+    .option('-s, --set <token>', 'Save access token into .env')
+    .action(async (options) => {
+      try {
+        if (options.set) {
+          setEnvValue('VNPOST_TOKEN', options.set);
+        }
+      } catch (error) {
+        console.error(error.message);
+      }
+    });
 
   vnpost
     .command('get')

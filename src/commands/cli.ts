@@ -5,6 +5,7 @@ import { Command } from 'commander';
 import { ghtkCommand } from './ghtk.command';
 import { kiotvietCommand } from './kiotviet.command';
 import { vnpostCommand } from './vnpost.command';
+import { settingCommand } from './setting.command';
 
 if (process.env.NODE_ENV === 'production')
   console.debug = () => {};
@@ -26,6 +27,7 @@ program
   .description('CLI to manage invoices, orders')
   .version('0.0.1');
 
+program.addCommand(settingCommand());
 program.addCommand(ghtkCommand());
 program.addCommand(vnpostCommand());
 program.addCommand(kiotvietCommand());

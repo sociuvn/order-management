@@ -30,7 +30,24 @@
 Have a bug or a feature request? Please first read the [issue guidelines](https://github.com/sociuvn/order-management/blob/main/CONTRIBUTING.md) and search for existing and closed issues. If your problem or idea is not addressed yet, [please open a new issue](https://github.com/sociuvn/order-management/issues/new).
 ## Some commands
 ### Dev
+#### Setting
+
+* ENV:
+
+```
+# Setting ENV (key & value) to .env
+npm run cli -- setting env -k KEY_ABC -v value_xyz
+```
+
 #### Kiotviet
+* Token:
+
+```
+# Save token into .env
+npm run cli -- ghtk token -s eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6xxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+* Orders:
 
 ```console
 # Get order by code
@@ -38,6 +55,15 @@ npm run cli -- ghtk get -c 123456789
 ```
 
 #### VNPost
+
+* Token:
+
+```
+# Save token into .env
+npm run cli -- vnpost token -s eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6xxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+* Orders:
 
 ```console
 # Get order by code
