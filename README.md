@@ -6,7 +6,7 @@
   <h3 align="center">Order Management</h3>
 
   <p align="center">
-    A CLI tool for get & sync Kiotviet, GHTK data
+    A CLI tool for get & sync Kiotviet, GHTK, VNPost data
     <br>
     <a href="https://github.com/sociuvn/order-management/issues/new?labels=bug&title=New+bug+report">Report bug</a>
     ·
