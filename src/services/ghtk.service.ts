@@ -3,9 +3,8 @@ import { getOrder as getGHTKOrder, Order as GHTKOrder } from '../util/ghtk.util'
 
 const getOrder = async (id: string): Promise<Order> => {
   const order: GHTKOrder = await getGHTKOrder(id);
-  let result: Order;
 
-  result = {
+  return {
     id: order.id,
     statusCode: order.statusCode,
     status: order.status,
@@ -20,8 +19,6 @@ const getOrder = async (id: string): Promise<Order> => {
     doneAt: new Date(order.doneAt * 1000),
     returnAt: order.returnAt ? new Date(order.returnAt * 1000) : undefined
   };
-
-  return result;
 };
 
 export { getOrder as getGHTKOrder };

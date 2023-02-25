@@ -105,7 +105,7 @@ const syncInvoices = async (status: number, fromPurchaseDate: Date, toPurchaseDa
       await syncInvoice(invoices[i], i);
       info('------');
     }
-    info(`(Total: ${invoices?.length} invoices)`)
+    info(`(Total: ${invoices?.length} invoices)`);
   } catch (error) {
     console.error(error.message);
   }
@@ -140,7 +140,7 @@ const createVNPostCustomers = async (fromPurchaseDate: Date, toPurchaseDate: Dat
     for (const order of orders) {
       info(`-------------------- [VNPost Order: ${order.code}] --------------------`);
       await findAndCreateCustomer(order);
-      info(`------`);
+      info('------');
     }
   } catch (error) {
     console.error(error.message);
@@ -160,7 +160,7 @@ const findCustomerByPhone = async (phone: string): Promise<Customer> => {
   try {
     const findDto: ListCustomerRequestDto = {
       contactNumber: phone
-    }
+    };
     const customers: Customer[] = await getKVCustomers(findDto);
     if (customers?.length > 0) {
       customer = customers[0];
@@ -195,7 +195,7 @@ const findAndCreateCustomer = async (order: Order) => {
         contactNumber: orderDetail.phone,
         address: orderDetail.address,
         branchId: Number(kiotviet.branch1)
-      }
+      };
       customer = await createCustomer(customerRequest);
 
       customer ? info(`✔️  [VNPOST] Phone: ${orderDetail.phone} - Name: ${orderDetail.fullName} - Address: ${orderDetail.address} => [KiotViet] Phone: ${customer.contactNumber} - Name: ${customer.name} - Address: ${customer.address} - Ward: ${customer.wardName || 'None'} - Location: ${customer.locationName || 'None'}`)

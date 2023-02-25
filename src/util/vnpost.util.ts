@@ -46,7 +46,7 @@ export class OrderRequestDto {
   OrderByDescending: boolean;
   PageIndex: number;
   PageSize: number;
-};
+}
 
 const getOrdersOfCustomer = async (data: OrderRequestDto): Promise<ListOrder> => {
   const url = `${vnpost.baseUrl}${vnpost.getListOrderOfCustomer}`;
@@ -63,7 +63,7 @@ const getOrdersOfCustomer = async (data: OrderRequestDto): Promise<ListOrder> =>
         'h-token': vnpost.token
       },
       body: JSON.stringify(data)
-    }
+    };
     response = await fetch(url, options);
 
     if (response.status == 200) {

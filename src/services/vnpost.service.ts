@@ -10,9 +10,9 @@ const showOrders = async (fromPurchaseDate: Date, toPurchaseDate: Date) => {
     orders.forEach(async (order, index) => {
       info(`-------------------- 🔰 VNPost Order #${index + 1}: ${order.code} 🔰 --------------------`);
       showOrder(order);
-    })
+    });
 
-    info(`(Total: ${orders?.length} orders)`)
+    info(`(Total: ${orders?.length} orders)`);
   } catch (error) {
     console.error(error.message);
   }
@@ -24,7 +24,7 @@ const showOrder = (order: Order) => {
   info('🠺 Order delivery status: ' + order.status);
   info('🠺 Order products: ' + order.products);
   info('🠺 Order delivery date: ' + order.doneAt);
-}
+};
 
 const getOrder = async (condition: string): Promise<Order> => {
   const data: OrderRequestDto = {
@@ -35,12 +35,10 @@ const getOrder = async (condition: string): Promise<Order> => {
     PageSize: 5,
   };
 
-  let result: Order;
-
   const orders: VNPostListOrder = await getOrdersOfCustomer(data);
 
   const item = orders?.Items[0];
-  result = {
+  return {
     id: item.Id,
     statusCode: item.OrderStatusId,
     status: item.OrderStatusName,
@@ -53,16 +51,13 @@ const getOrder = async (condition: string): Promise<Order> => {
     createdAt: new Date(item.CreateTime),
     doneAt: new Date(item.DeliveryTime),
     returnAt: undefined
-  };
-
-  return result;
+  } as Order;
 };
 
 const getOrderDetail = async (id: string): Promise<Order> => {
-  let result: Order;
   const item: OrderDetail = await getVNPostOrder(id);
 
-  result = {
+  return {
     id: item.Id,
     statusCode: item.OrderStatusId,
     status: item.OrderStatusName,
@@ -76,9 +71,7 @@ const getOrderDetail = async (id: string): Promise<Order> => {
     createdAt: new Date(item.CreateTime),
     doneAt: new Date(item.DeliveryTime),
     returnAt: item.OrderStatusName === 'Phát hoàn thành công' ? new Date(item.LastUpdateTime) : undefined
-  };
-
-  return result;
+  } as Order;
 };
 
 const getOrders = async (fromDate: string, toDate: string): Promise<Order[]> => {
@@ -95,7 +88,7 @@ const getOrders = async (fromDate: string, toDate: string): Promise<Order[]> => 
   const orders: VNPostListOrder = await getOrdersOfCustomer(data);
 
   return orders?.Items?.map((item: VNPostOrder) => {
-    let order = {
+    const order = {
       id: item.Id,
       statusCode: item.OrderStatusId,
       status: item.OrderStatusName,
@@ -120,6 +113,6 @@ const getAddress = (receiverAddress: string, receiverFullAddress: string) => {
     const addrSplitted = receiverFullAddress?.split(',');
     return addrSplitted.length <= 4 ? receiverFullAddress : addrSplitted.slice(0, -3).join(',').replace('(KhongXacDinh)', '').trim();
   }
-}
+};
 
 export { getOrder as getVNPostOrder, getOrders as getVNPostOrders, getOrderDetail as getVNPostOrderDetail, showOrders };

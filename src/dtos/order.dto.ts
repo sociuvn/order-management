@@ -12,7 +12,7 @@ export class Order {
   createdAt: Date;
   doneAt: Date;
   returnAt?: Date;
-};
+}
 
 export class OrderDetail {
 
