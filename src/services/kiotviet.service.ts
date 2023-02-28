@@ -52,7 +52,7 @@ const syncInvoice = async (invoice: any, index = 0) => {
       const deliveryDate = ghtkOrder.doneAt ?? undefined;
       log('🠺 Invoice status: ' + getInvoiceStatusText(invoice.status));
       log('🠺 Order delivery status: ' + ghtkOrder.status);
-      log('🠺 Order delivery date: ' + deliveryDate);
+      log('🠺 Order delivery date: ' + (deliveryDate || 'Time is not recorded'));
       log('--');
 
       const deliveryStatus = toGHTKDeliveryStatus(ghtkOrder.status);
@@ -79,7 +79,7 @@ const syncInvoice = async (invoice: any, index = 0) => {
       const deliveryDate = vnpostOrder.doneAt ?? undefined;
       log('🠺 Invoice status: ' + getInvoiceStatusText(invoice.status));
       log('🠺 Order delivery status: ' + vnpostOrder.status);
-      log('🠺 Order delivery date: ' + deliveryDate);
+      log('🠺 Order delivery date: ' + (deliveryDate || 'Time is not recorded'));
       log('--');
 
       const deliveryStatus = toVNPOSTDeliveryStatus(vnpostOrder.statusCode);

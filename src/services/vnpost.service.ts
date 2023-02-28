@@ -48,8 +48,8 @@ const getOrder = async (condition: string): Promise<Order> => {
     feeShip: Number(item.TotalFreightIncludeVat),
     products: item.PackageContent.substring(0, item.PackageContent.indexOf('TMĐT')),
     code: item.OrderCode,
-    createdAt: new Date(item.CreateTime),
-    doneAt: new Date(item.DeliveryTime),
+    createdAt: item.CreateTime ? new Date(item.CreateTime) : undefined,
+    doneAt: item.DeliveryTime ? new Date(item.DeliveryTime) : undefined,
     returnAt: undefined
   } as Order : undefined;
 };
