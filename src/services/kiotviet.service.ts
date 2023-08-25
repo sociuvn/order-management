@@ -113,7 +113,6 @@ const syncInvoices = async (status: number, fromPurchaseDate: Date, toPurchaseDa
 
     for (let i = 0; i < invoices.length; i++) {
       await syncInvoice(invoices[i], i);
-      info('------');
     }
     info(`(Total: ${invoices?.length} invoices)`);
   } catch (error) {
@@ -147,10 +146,9 @@ const createVNPostCustomers = async (fromPurchaseDate: Date, toPurchaseDate: Dat
     const orders: Order[] = await getVNPostOrders(fromPurchaseDate.toISOString(), toPurchaseDate.toISOString());
     info(`🙌 Find ${orders?.length} VNPOST orders from ${fromPurchaseDate.toLocaleDateString()} to ${toPurchaseDate.toLocaleDateString()}!`);
 
-    for (const order of orders) {
-      info(`-------------------- [VNPost Order: ${order.code}] --------------------`);
-      await findAndCreateCustomer(order);
-      info('------');
+    for (let i = orders.length - 1; i >= 0; i--) {
+      info(`-------------------- [VNPost Order: ${orders[i].code} (${orders[i].createdAt?.toLocaleDateString()})] --------------------`);
+      await findAndCreateCustomer(orders[i]);
     }
   } catch (error) {
     console.error(error.message);
