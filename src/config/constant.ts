@@ -8,6 +8,8 @@ export const enum KIOTVIET_INVOICE_STATUS {
 }
 
 export const enum KIOTVIET_DELIVERY_STATUS {
+  TAKEN = 9,
+  RETURNNING = 4,
   COMPLETE = 3,
   PROCESSING = 1,
 }

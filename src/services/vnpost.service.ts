@@ -19,11 +19,11 @@ const showOrders = async (fromPurchaseDate: Date, toPurchaseDate: Date) => {
 };
 
 const showOrder = (order: Order) => {
-  info('🠺 Order Id: ' + order.id);
-  info('🠺 Order Code: ' + order.code);
-  info('🠺 Order delivery status: ' + order.status);
-  info('🠺 Order products: ' + order.products);
-  info('🠺 Order delivery date: ' + order.doneAt);
+  info('• Order Id: ' + order.id);
+  info('• Order Code: ' + order.code);
+  info('• Order delivery status: ' + order.status);
+  info('• Order products: ' + order.products);
+  info('• Order delivery date: ' + order.doneAt);
 };
 
 const getOrder = async (condition: string): Promise<Order> => {

@@ -50,9 +50,9 @@ const syncInvoice = async (invoice: any, index = 0) => {
       }
 
       const deliveryDate = ghtkOrder.doneAt ?? undefined;
-      log('🠺 Invoice status: ' + getInvoiceStatusText(invoice.status));
-      log('🠺 Order delivery status: ' + ghtkOrder.status);
-      log('🠺 Order delivery date: ' + (deliveryDate || 'Time is not recorded'));
+      log('• Invoice status: ' + getInvoiceStatusText(invoice.status));
+      log('• Order delivery status: ' + ghtkOrder.status);
+      log('• Order delivery date: ' + (deliveryDate || 'Time is not recorded'));
       log('--');
 
       const deliveryStatus = toGHTKDeliveryStatus(ghtkOrder.status);
@@ -77,9 +77,9 @@ const syncInvoice = async (invoice: any, index = 0) => {
       }
 
       const deliveryDate = vnpostOrder.doneAt ?? undefined;
-      log('🠺 Invoice status: ' + getInvoiceStatusText(invoice.status));
-      log('🠺 Order delivery status: ' + vnpostOrder.status);
-      log('🠺 Order delivery date: ' + (deliveryDate || 'Time is not recorded'));
+      log('• Invoice status: ' + getInvoiceStatusText(invoice.status));
+      log('• Order delivery status: ' + vnpostOrder.status);
+      log('• Order delivery date: ' + (deliveryDate || 'Time is not recorded'));
       log('--');
 
       const deliveryStatus = toVNPOSTDeliveryStatus(vnpostOrder.statusCode);
@@ -229,10 +229,14 @@ const toGHTKDeliveryStatus = (ghtkOrderStatus: string): number => {
 
 const toVNPOSTDeliveryStatus = (vnpostOrderStatus: number): number => {
   switch (vnpostOrderStatus) {
+    case 70: // Thu gom thành công
+      return KIOTVIET_DELIVERY_STATUS.TAKEN;
     case 100: // Phát thành công
     case 110: // Chờ trả tiền
     case 120: // Đã trả tiền
       return KIOTVIET_DELIVERY_STATUS.COMPLETE;
+    case 170: // Phát hoàn thành công
+      return KIOTVIET_DELIVERY_STATUS.RETURNNING;
     default:
       return KIOTVIET_DELIVERY_STATUS.PROCESSING;
   }
