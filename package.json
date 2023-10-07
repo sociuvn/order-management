@@ -41,7 +41,7 @@
     "lodash": "4.17.21",
     "node-fetch": "3.3.2",
     "reflect-metadata": "^0.1.13",
-    "winston": "3.8.2"
+    "winston": "3.11.0"
   },
   "devDependencies": {
     "@types/body-parser": "1.19.2",
