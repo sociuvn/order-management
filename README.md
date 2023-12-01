@@ -14,7 +14,7 @@
   </p>
 </p>
 
-[![Node CI](https://github.com/sociuvn/order-management/actions/workflows/nodejs.yml/badge.svg)](https://github.com/sociuvn/order-management/actions/workflows/nodejs.yml)
+[![CI](https://github.com/sociuvn/order-management/actions/workflows/ci.yml/badge.svg)](https://github.com/sociuvn/order-management/actions/workflows/ci.yml)
 
 ## Table of contents
 - [Quick start](#quick-start)
