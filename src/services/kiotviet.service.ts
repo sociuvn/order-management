@@ -36,7 +36,7 @@ const syncInvoice = async (invoice: any, index = 0) => {
     const deliveryCode = invoice.invoiceDelivery?.deliveryCode;
 
     if (partnerDelivery?.code !== kiotviet.partnerDelivery.GHTK && partnerDelivery?.code !== kiotviet.partnerDelivery.VNPOST) {
-      info(`🙃 Skip data sync for invoice ${invoice.code} because delivery partner is not be GHTK, VNPOST!`);
+      info(`🙃 Skip data sync for invoice ${invoice.code} because delivery partner is not be GHTK, GHN, VNPOST!`);
       return;
     }
 
@@ -156,6 +156,14 @@ const createVNPostCustomers = async (fromPurchaseDate: Date, toPurchaseDate: Dat
 };
 
 const createGHTKCustomers = async (fromPurchaseDate: Date, toPurchaseDate: Date) => {
+  try {
+    // TODO
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+const createGHNCustomers = async (fromPurchaseDate: Date, toPurchaseDate: Date) => {
   try {
     // TODO
   } catch (error) {
