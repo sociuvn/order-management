@@ -41,7 +41,7 @@
     "express-validator": "7.0.1",
     "lodash": "4.17.21",
     "node-fetch": "3.3.2",
-    "reflect-metadata": "0.1.13",
+    "reflect-metadata": "0.1.14",
     "winston": "3.11.0"
   },
   "devDependencies": {
