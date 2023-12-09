@@ -6,7 +6,7 @@
   <h3 align="center">Order Management</h3>
 
   <p align="center">
-    A CLI tool for get & sync Kiotviet, GHTK, VNPost data
+    A CLI tool for get & sync Kiotviet, GHTK, GHN, VNPost data
     <br>
     <a href="https://github.com/sociuvn/order-management/issues/new?labels=bug&title=New+bug+report">Report bug</a>
     ·
@@ -17,10 +17,9 @@
 [![CI](https://github.com/sociuvn/order-management/actions/workflows/ci.yml/badge.svg)](https://github.com/sociuvn/order-management/actions/workflows/ci.yml)
 
 ## Table of contents
-- [Quick start](#quick-start)
+
 - [Bugs and feature requests](#bugs-and-feature-requests)
 - [Some commands](#some-commands)
-- [Contributing](#contributing)
 - [Creators](#creators)
 - [Thanks](#thanks)
 - [Copyright and license](#copyright-and-license)
@@ -28,44 +27,48 @@
 ## Bugs and feature requests
 
 Have a bug or a feature request? Please first read the [issue guidelines](https://github.com/sociuvn/order-management/blob/main/CONTRIBUTING.md) and search for existing and closed issues. If your problem or idea is not addressed yet, [please open a new issue](https://github.com/sociuvn/order-management/issues/new).
+
 ## Some commands
+
 ### Dev
+
 #### Setting
 
-* ENV:
+- ENV:
 
-```
+```bash
 # Setting ENV (key & value) to .env
 npm run cli -- setting env -k KEY_ABC -v value_xyz
 ```
 
-#### Kiotviet
-* Token:
+**Kiotviet:**
 
-```
+- Token:
+
+```bash
 # Save token into .env
 npm run cli -- ghtk token -s eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6xxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-* Orders:
+- Orders:
 
-```console
+```bash
 # Get order by code
 npm run cli -- ghtk get -c 123456789
 ```
 
-#### VNPost
+**VNPost:**
 
-* Token:
+- Token:
 
-```
+```bash
 # Save token into .env
 npm run cli -- vnpost token -s eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6xxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-* Orders:
+- Orders:
 
-```console
+```bash
 # Get order by code
 npm run cli -- vnpost get -c EE123456789VN
 
@@ -84,9 +87,9 @@ npm run cli -- vnpost get -t 2023-02-26
 
 #### Kiotviet
 
-* Token:
+- Token:
 
-```console
+```bash
 # Get token
 npm run cli -- kiotviet token -g
 
@@ -97,16 +100,16 @@ npm run cli -- kiotviet token -s
 npm run cli -- kiotviet token -gs
 ```
 
-* Branches:
+- Branches:
 
-```console
+```bash
 # Show list branches
 npm run cli -- kiotviet branches list
 ```
 
-* Customers:
+- Customers:
 
-```console
+```bash
 # Create customers from VNPost, GHTK orders by date
 npm run cli -- kiotviet customers create -d 2023-02-20
 
@@ -120,9 +123,9 @@ npm run cli -- kiotviet customers create -f 2023-02-20 -t 2023-02-23
 npm run cli -- kiotviet customers create -t 2023-02-26
 ```
 
-* Invoices:
+- Invoices:
 
-```console
+```bash
 # Get invoice by code
 npm run cli -- kiotviet invoices get -c HD123456
 
@@ -143,11 +146,11 @@ npm run cli -- kiotviet invoices sync -t 2023-02-26
 ```
 
 ## Creators
+
 - [lamngockhuong](https://github.com/lamngockhuong/)
 - [khuongln-1346](https://github.com/khuongln-1346/)
 
 ## Thanks
-
 
 ## Copyright and license
 
