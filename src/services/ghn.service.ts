@@ -1,12 +1,14 @@
 import { info } from '../util/console';
 import { Order } from '../dtos/order.dto';
-import { Order as GHNOrder, getOrder as getGHNOrder, getTrackingLogs, searchOrder } from '../util/ghn.util';
+import { Order as GHNOrder, ListOrder, getOrder as getGHNOrder, getTrackingLogs, searchOrder } from '../util/ghn.util';
 
 const showOrders = async (fromPurchaseDate: Date, toPurchaseDate: Date) => {
   try {
+    const fromTime = Math.floor(fromPurchaseDate.getTime() / 1000);
+    const toTime = Math.floor(toPurchaseDate.getTime() / 1000);
     const orders: Order[] = await getOrders(
-      fromPurchaseDate.toISOString(),
-      toPurchaseDate.toISOString()
+      fromTime,
+      toTime
     );
     info(
       `🙌 Find ${
@@ -38,42 +40,64 @@ const showOrder = (order: Order) => {
 };
 
 const getOrders = async (
-  fromDate: string,
-  toDate: string
+  fromTime: number,
+  toTime: number
 ): Promise<Order[]> => {
-  return [];
-  // const data: OrderRequestDto = {
-  //   ChildUserId: '',
-  //   CreateTimeStart: fromDate,
-  //   CreateTimeEnd: toDate,
-  //   KeySearch: '',
-  //   OrderByDescending: true,
-  //   PageIndex: 0,
-  //   PageSize: 1000,
-  // };
+  const data = {
+    status: [
+      'ready_to_pick',
+      'picking',
+      'money_collect_picking',
+      'picked',
+      'sorting',
+      'storing',
+      'transporting',
+      'delivering',
+      'delivery_fail',
+      'money_collect_delivering',
+      'return',
+      'returning',
+      'return_fail',
+      'return_transporting',
+      'return_sorting',
+      'waiting_to_return',
+      'returned',
+      'delivered',
+      'cancel',
+      'lost',
+      'damage',
+    ],
+    payment_type_id: [1, 2, 4, 5],
+    from_time: fromTime,
+    to_time: toTime,
+    offset: 0,
+    limit: 1000000,
+    from_cod_amount: 0,
+    to_cod_amount: 0,
+    ignore_shop_id: false,
+    is_search_exactly: false,
+    source: '5sao',
+  };
 
-  // const orders: VNPostListOrder = await searchOrder(data);
+  const orders: ListOrder = await searchOrder(data);
 
-  // return orders?.Items?.map((item: VNPostOrder) => {
-  //   const order = {
-  //     id: item.Id,
-  //     statusCode: item.OrderStatusId,
-  //     status: item.OrderStatusName,
-  //     fullName: item.ReceiverFullname,
-  //     phone: item.ReceiverTel,
-  //     codAmount: item.CodAmount,
-  //     feeShip: Number(item.TotalFreightIncludeVat),
-  //     products: item.PackageContent.substring(
-  //       0,
-  //       item.PackageContent.indexOf('TMĐT')
-  //     ),
-  //     code: item.OrderCode,
-  //     createdAt: new Date(item.CreateTime),
-  //     doneAt: new Date(item.DeliveryTime),
-  //   };
-
-  //   return order;
-  // });
+  return orders?.data.map((order: GHNOrder) => {
+    return {
+      id: order.id,
+      statusCode: undefined,
+      status: order.status,
+      fullName: order.toName,
+      phone: order.toPhone,
+      address: order.toAddress,
+      codAmount: order.codAmount,
+      feeShip: order.totalFee,
+      products: order.items.map((p) => p.name).join(','),
+      code: order.orderCode,
+      createdAt: order.orderDate,
+      doneAt: order.finishDate,
+      returnAt: order.returnTime,
+    };
+  });
 };
 
 const getOrder = async (orderCode: string): Promise<Order> => {

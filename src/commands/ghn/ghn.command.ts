@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { setEnvValue } from '../../util/env.util';
-import { UTC_TIME_FORMAT } from '../../config/constant';
+import { VN_TIME_FORMAT } from '../../config/constant';
 import { info, log } from '../../util/console';
 import { getGHNOrder, showOrders } from '../../services/ghn.service';
 
@@ -44,16 +44,22 @@ export const ghnCommand = (): Command => {
         let fromPurchaseDate;
         let toPurchaseDate;
         if (date) {
-          fromPurchaseDate = toPurchaseDate = new Date(
-            `${date}${UTC_TIME_FORMAT}`
+          fromPurchaseDate = new Date(
+            `${date}${VN_TIME_FORMAT}`
           );
+
+          toPurchaseDate = new Date();
+          toPurchaseDate.setHours(0, 0, 0, 0);
+          toPurchaseDate.setDate(toPurchaseDate.getDate() + 1);
         } else {
           fromPurchaseDate = from
-            ? new Date(`${from}${UTC_TIME_FORMAT}`)
+            ? new Date(`${from}${VN_TIME_FORMAT}`)
             : new Date();
           toPurchaseDate = to
-            ? new Date(`${to}${UTC_TIME_FORMAT}`)
+            ? new Date(`${to}${VN_TIME_FORMAT}`)
             : new Date();
+
+          toPurchaseDate.setDate(toPurchaseDate.getDate() + 1);
         }
         log(`From: ${fromPurchaseDate}, to: ${toPurchaseDate}`);
         await showOrders(fromPurchaseDate, toPurchaseDate);

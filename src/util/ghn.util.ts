@@ -63,9 +63,42 @@ class Item {
   quantity: number;
 }
 
-export const searchOrder = async (id: string): Promise<Order[]> => {
+export class ListOrder {
+  @Type(() => Order)
+  data: Order[];
+
+  total: number;
+}
+
+export const searchOrder = async (data: any): Promise<ListOrder> => {
   const url = `${ghn.baseShipUrl}${ghn.searchOrder}`;
-  return [];
+  let options;
+  let response;
+  let dataResponse;
+  let result;
+
+  try {
+    options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        token: ghn.token,
+      },
+      body: JSON.stringify(data),
+    };
+    response = await fetch(url, options);
+
+    if (response.status == 200) {
+      dataResponse = await response.json();
+      result = transformObject(ListOrder, dataResponse?.data);
+    } else {
+      throw Error(`[GHN] ${await response.text()}`);
+    }
+  } catch (e) {
+    throw e;
+  }
+
+  return result;
 };
 
 export const getOrder = async (orderCode: string): Promise<Order> => {
