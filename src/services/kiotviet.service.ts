@@ -5,6 +5,7 @@ import { kiotviet } from '../config/kiotviet';
 import { KIOTVIET_DELIVERY_STATUS, KIOTVIET_INVOICE_STATUS } from '../config/constant';
 import { getVNPostOrder, getVNPostOrderDetail, getVNPostOrders } from './vnpost.service';
 import { Order } from '../dtos/order.dto';
+import { getGHNOrder } from './ghn.service';
 
 const printInvoiceByCode = async (code: string) => {
   try {
@@ -33,66 +34,44 @@ const syncInvoiceByCode = async (code: string) => {
 const syncInvoice = async (invoice: any, index = 0) => {
   try {
     const partnerDelivery = invoice.invoiceDelivery?.partnerDelivery;
-    const deliveryCode = invoice.invoiceDelivery?.deliveryCode;
 
-    if (partnerDelivery?.code !== kiotviet.partnerDelivery.GHTK && partnerDelivery?.code !== kiotviet.partnerDelivery.VNPOST) {
-      info(`🙃 Skip data sync for invoice ${invoice.code} because delivery partner is not be GHTK, GHN, VNPOST!`);
+    if (
+      partnerDelivery?.code !== kiotviet.partnerDelivery.GHTK &&
+      partnerDelivery?.code !== kiotviet.partnerDelivery.GHN &&
+      partnerDelivery?.code !== kiotviet.partnerDelivery.VNPOST
+    ) {
+      info(
+        `🙃 Skip data sync for invoice ${invoice.code} because delivery partner is not be GHTK, GHN, VNPOST!`
+      );
       return;
     }
 
     let data = {};
     if (partnerDelivery?.code === kiotviet.partnerDelivery.GHTK) {
-      log(`-------------------- [GHTK Order #${index + 1}: ${deliveryCode}] --------------------`);
-      const ghtkOrder: Order = await getGHTKOrder(deliveryCode);
+      data = await syncInvoiceByDelivery(
+        index,
+        invoice,
+        getGHTKOrder,
+        toGHTKDeliveryStatus
+      );
+    }
 
-      if (!ghtkOrder) {
-        return;
-      }
-
-      const deliveryDate = ghtkOrder.doneAt ?? undefined;
-      log('• Invoice status: ' + getInvoiceStatusText(invoice.status));
-      log('• Order delivery status: ' + ghtkOrder.status);
-      log('• Order delivery date: ' + (deliveryDate || 'Time is not recorded'));
-      log('--');
-
-      const deliveryStatus = toGHTKDeliveryStatus(ghtkOrder.status);
-      data = {
-        ...data,
-        deliveryDetail: {
-          status: deliveryStatus,
-          price: ghtkOrder?.feeShip,
-          usingPriceCod: invoice.invoiceDelivery.usingPriceCod,
-          expectedDelivery: deliveryDate,
-          partnerDelivery: partnerDelivery
-        }
-      };
+    if (partnerDelivery?.code === kiotviet.partnerDelivery.GHN) {
+      data = await syncInvoiceByDelivery(
+        index,
+        invoice,
+        getGHNOrder,
+        toGHNDeliveryStatus
+      );
     }
 
     if (partnerDelivery?.code === kiotviet.partnerDelivery.VNPOST) {
-      log(`-------------------- [VNPost Order #${index + 1}: ${deliveryCode}] --------------------`);
-      const vnpostOrder: Order = await getVNPostOrder(deliveryCode);
-
-      if (!vnpostOrder) {
-        return;
-      }
-
-      const deliveryDate = vnpostOrder.doneAt ?? undefined;
-      log('• Invoice status: ' + getInvoiceStatusText(invoice.status));
-      log('• Order delivery status: ' + vnpostOrder.status);
-      log('• Order delivery date: ' + (deliveryDate || 'Time is not recorded'));
-      log('--');
-
-      const deliveryStatus = toVNPOSTDeliveryStatus(vnpostOrder.statusCode);
-      data = {
-        ...data,
-        deliveryDetail: {
-          status: deliveryStatus,
-          price: vnpostOrder?.feeShip,
-          usingPriceCod: invoice.invoiceDelivery.usingPriceCod,
-          expectedDelivery: deliveryDate,
-          partnerDelivery: partnerDelivery
-        }
-      };
+      data = await syncInvoiceByDelivery(
+        index,
+        invoice,
+        getVNPostOrder,
+        toVNPostDeliveryStatus
+      );
     }
 
     if (invoice.status === KIOTVIET_INVOICE_STATUS.PROCESSING || invoice.status === KIOTVIET_INVOICE_STATUS.COMPLETE) {
@@ -104,6 +83,43 @@ const syncInvoice = async (invoice: any, index = 0) => {
   } catch (error) {
     console.error(error.message);
   }
+};
+
+const syncInvoiceByDelivery = async (
+  index: number,
+  invoice: any,
+  getOrder: (id: string) => Promise<Order>,
+  toDeliveryStatus: (status: any) => number,
+) => {
+  const deliveryCode = invoice.invoiceDelivery?.deliveryCode;
+
+  log(
+    `-------------------- [Order #${
+      index + 1
+    }: ${deliveryCode}] --------------------`
+  );
+  const order: Order = await getOrder(deliveryCode);
+
+  if (!order) {
+    return;
+  }
+
+  const deliveryDate = order.doneAt ?? undefined;
+  log('• Invoice status: ' + getInvoiceStatusText(invoice.status));
+  log('• Order delivery status: ' + order.status);
+  log('• Order delivery date: ' + (deliveryDate || 'Time is not recorded'));
+  log('--');
+
+  const deliveryStatus = toDeliveryStatus(order.status);
+  return {
+    deliveryDetail: {
+      status: deliveryStatus,
+      price: order?.feeShip,
+      usingPriceCod: invoice.invoiceDelivery.usingPriceCod,
+      expectedDelivery: deliveryDate,
+      partnerDelivery: invoice.invoiceDelivery?.partnerDelivery,
+    },
+  };
 };
 
 const syncInvoices = async (status: number, fromPurchaseDate: Date, toPurchaseDate: Date) => {
@@ -233,7 +249,19 @@ const toGHTKDeliveryStatus = (ghtkOrderStatus: string): number => {
   }
 };
 
-const toVNPOSTDeliveryStatus = (vnpostOrderStatus: number): number => {
+const toGHNDeliveryStatus = (ghnOrderStatus: string): number => {
+  switch (ghnOrderStatus) {
+    case 'delivered':
+      return KIOTVIET_DELIVERY_STATUS.COMPLETE;
+    case 'return':
+    case 'returned':
+      return KIOTVIET_DELIVERY_STATUS.RETURNNING;
+    default:
+      return KIOTVIET_DELIVERY_STATUS.PROCESSING;
+  }
+};
+
+const toVNPostDeliveryStatus = (vnpostOrderStatus: number): number => {
   switch (vnpostOrderStatus) {
     case 70: // Thu gom thành công
       return KIOTVIET_DELIVERY_STATUS.TAKEN;

@@ -1,8 +1,8 @@
 import { Command, Option } from 'commander';
-import { listBranchesCommand } from './kiotviet/branches.command';
-import { createCustomersCommand } from './kiotviet/customers.command';
-import { getInvoiceCommand, syncInvoiceCommand } from './kiotviet/invoices.command';
-import { tokenCommand } from './kiotviet/token.command';
+import { listBranchesCommand } from './branches.command';
+import { createCustomersCommand } from './customers.command';
+import { getInvoiceCommand, syncInvoiceCommand } from './invoices.command';
+import { tokenCommand } from './token.command';
 
 export const kiotvietCommand = (): Command => {
   const kiotviet = new Command('kiotviet').description('manage, sync invoice, order,...');
@@ -28,7 +28,7 @@ export const kiotvietCommand = (): Command => {
 
   customers
     .command('create')
-    .description('create kiotviet customers from ghtk, vnpost order')
+    .description('create kiotviet customers from ghtk, ghn vnpost order')
     .option('-d, --date <yyyy-MM-dd>', 'Purchase Date')
     .addOption(new Option('-f, --from <yyyy-MM-dd>', 'From Purchase Date').conflicts('date'))
     .addOption(new Option('-t, --to <yyyy-MM-dd>', 'To Purchase Date').conflicts('date'))
@@ -48,7 +48,7 @@ export const kiotvietCommand = (): Command => {
 
   invoices
     .command('sync')
-    .description('sync kiotviet invoice with ghtk, vnpost order')
+    .description('sync kiotviet invoice with ghtk, ghn, vnpost order')
     .option('-c, --code <value>', 'Kiotviet invoice code')
     .addOption(new Option('-d, --date <yyyy-MM-dd>', 'Purchase Date').conflicts('code'))
     .addOption(new Option('-f, --from <yyyy-MM-dd>', 'From Purchase Date').conflicts('code').conflicts('date'))
