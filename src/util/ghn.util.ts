@@ -40,12 +40,15 @@ export class Order {
   statusName: string;
 
   @Expose({ name: 'order_date' })
+  @Type(() => Date)
   orderDate: Date;
 
   @Expose({ name: 'finish_date' })
+  @Type(() => Date)
   finishDate?: Date;
 
   @Expose({ name: 'return_time' })
+  @Type(() => Date)
   returnTime?: Date;
 
   @Expose({ name: 'main_service_fee' })
