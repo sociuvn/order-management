@@ -32,7 +32,7 @@ Have a bug or a feature request? Please first read the [issue guidelines](https:
 
 ### Dev
 
-#### Setting
+**Setting:**
 
 - ENV:
 
@@ -41,7 +41,7 @@ Have a bug or a feature request? Please first read the [issue guidelines](https:
 npm run cli -- setting env -k KEY_ABC -v value_xyz
 ```
 
-**Kiotviet:**
+**GHTK:**
 
 - Token:
 
@@ -55,6 +55,34 @@ npm run cli -- ghtk token -s eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6xxxxxxx
 ```bash
 # Get order by code
 npm run cli -- ghtk get -c 123456789
+```
+
+**GHN:**
+
+- Token:
+
+```bash
+# Save token into .env
+npm run cli -- ghn token -s xxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+- Orders:
+
+```bash
+# Get order by code
+npm run cli -- ghn get -c EE123456789VN
+
+# Get orders by date
+npm run cli -- ghn get -d 2023-02-20
+
+# Get orders from the date to current date
+npm run cli -- ghn get -f 2023-02-20
+
+# Get orders from the date to other date
+npm run cli -- ghn get -f 2023-02-20 -t 2023-02-23
+
+# Get orders from current date to the date
+npm run cli -- ghn get -t 2023-02-26
 ```
 
 **VNPost:**
