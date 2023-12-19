@@ -1,6 +1,6 @@
 export class Order {
   id: string;
-  statusCode: number;
+  statusCode?: number;
   status: string;
   fullName: string;
   phone: string;

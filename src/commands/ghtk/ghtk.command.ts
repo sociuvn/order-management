@@ -1,7 +1,7 @@
 import { Command } from 'commander';
-import { setEnvValue } from '../util/env.util';
-import { getGHTKOrder } from '../services/ghtk.service';
-import { info } from '../util/console';
+import { setEnvValue } from '../../util/env.util';
+import { getGHTKOrder } from '../../services/ghtk.service';
+import { info } from '../../util/console';
 
 export const ghtkCommand = (): Command => {
   const ghtk = new Command('ghtk').description('manage order, get information,...');
@@ -13,7 +13,7 @@ export const ghtkCommand = (): Command => {
     .action(async (options) => {
       try {
         if (options.set) {
-          setEnvValue('GHTK_TOKEN111', options.set);
+          setEnvValue('GHTK_TOKEN', options.set);
         }
       } catch (error) {
         console.error(error.message);
