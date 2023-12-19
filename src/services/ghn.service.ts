@@ -4,12 +4,8 @@ import { Order as GHNOrder, ListOrder, getOrder as getGHNOrder, getTrackingLogs,
 
 const showOrders = async (fromPurchaseDate: Date, toPurchaseDate: Date) => {
   try {
-    const fromTime = Math.floor(fromPurchaseDate.getTime() / 1000);
-    const toTime = Math.floor(toPurchaseDate.getTime() / 1000);
-    const orders: Order[] = await getOrders(
-      fromTime,
-      toTime
-    );
+
+    const orders: Order[] = await getOrders(fromPurchaseDate, toPurchaseDate);
     info(
       `🙌 Find ${
         orders?.length
@@ -40,9 +36,11 @@ const showOrder = (order: Order) => {
 };
 
 const getOrders = async (
-  fromTime: number,
-  toTime: number
+  fromPurchaseDate: Date,
+  toPurchaseDate: Date
 ): Promise<Order[]> => {
+  const fromTime = Math.floor(fromPurchaseDate.getTime() / 1000);
+  const toTime = Math.floor(toPurchaseDate.getTime() / 1000);
   const data = {
     status: [
       'ready_to_pick',
@@ -128,4 +126,4 @@ const getOrder = async (orderCode: string): Promise<Order> => {
   } as Order;
 };
 
-export { getOrder as getGHNOrder, showOrders };
+export { getOrder as getGHNOrder, showOrders, getOrders as getGHNOrders };

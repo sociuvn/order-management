@@ -5,7 +5,7 @@ import { kiotviet } from '../config/kiotviet';
 import { KIOTVIET_DELIVERY_STATUS, KIOTVIET_INVOICE_STATUS } from '../config/constant';
 import { getVNPostOrder, getVNPostOrderDetail, getVNPostOrders } from './vnpost.service';
 import { Order } from '../dtos/order.dto';
-import { getGHNOrder } from './ghn.service';
+import { getGHNOrder, getGHNOrders } from './ghn.service';
 
 const printInvoiceByCode = async (code: string) => {
   try {
@@ -150,7 +150,8 @@ const listBranches = async () => {
 
 const createCustomers = async (fromPurchaseDate: Date, toPurchaseDate: Date) => {
   try {
-    createVNPostCustomers(fromPurchaseDate, toPurchaseDate);
+    await createVNPostCustomers(fromPurchaseDate, toPurchaseDate);
+    await createGHNCustomers(fromPurchaseDate, toPurchaseDate);
     // TODO createGHTKCustomers(fromPurchaseDate, toPurchaseDate);
   } catch (error) {
     console.error(error.message);
@@ -164,7 +165,7 @@ const createVNPostCustomers = async (fromPurchaseDate: Date, toPurchaseDate: Dat
 
     for (let i = orders.length - 1; i >= 0; i--) {
       info(`-------------------- [VNPost Order: ${orders[i].code} (${orders[i].createdAt?.toLocaleDateString()})] --------------------`);
-      await findAndCreateCustomer(orders[i]);
+      await findAndCreateCustomer('VNPOST', orders[i]);
     }
   } catch (error) {
     console.error(error.message);
@@ -181,7 +182,24 @@ const createGHTKCustomers = async (fromPurchaseDate: Date, toPurchaseDate: Date)
 
 const createGHNCustomers = async (fromPurchaseDate: Date, toPurchaseDate: Date) => {
   try {
-    // TODO
+    toPurchaseDate.setDate(toPurchaseDate.getDate() + 1);
+
+    const orders: Order[] = await getGHNOrders(
+      fromPurchaseDate,
+      toPurchaseDate
+    );
+    info(
+      `🙌 Find ${
+        orders?.length
+      } GHN orders from ${fromPurchaseDate.toLocaleDateString()} to ${toPurchaseDate.toLocaleDateString()}!`
+    );
+
+    for (let i = orders.length - 1; i >= 0; i--) {
+      info(
+        `-------------------- [GHN Order: ${orders[i].code} (${orders[i].createdAt?.toLocaleDateString()})] --------------------`
+      );
+      await findAndCreateCustomer('GHN', orders[i]);
+    }
   } catch (error) {
     console.error(error.message);
   }
@@ -212,14 +230,20 @@ const createCustomer = async (customer: AddCustomerRequestDto): Promise<Customer
   }
 };
 
-const findAndCreateCustomer = async (order: Order) => {
+const findAndCreateCustomer = async (from: 'VNPOST' | 'GHN' | 'GHTK', order: Order) => {
   try {
     let customer = await findCustomerByPhone(order.phone);
+    let orderDetail: Order;
     // Call API order detail to get customer address
-    const orderDetail: Order = await getVNPostOrderDetail(order.id);
-
+    if (from === 'VNPOST') {
+      orderDetail = await getVNPostOrderDetail(order.id);
+    } else if (from === 'GHN') {
+      orderDetail = await getGHNOrder(order.code);
+    } else if (from === 'GHTK') {
+      // TODO: Add logic for GHTK
+    }
     if (customer) {
-      info(`🔎 [VNPOST] Phone: ${orderDetail.phone} - Name: ${orderDetail.fullName} - Address: ${orderDetail.address} => [KiotViet] Phone: ${customer.contactNumber} - Name: ${customer.name} - Address: ${customer.address} - Ward: ${customer.wardName || 'None'} - Location: ${customer.locationName || 'None'}`);
+      info(`🔎 [${from}] Phone: ${orderDetail.phone} - Name: ${orderDetail.fullName} - Address: ${orderDetail.address} => [KiotViet] Phone: ${customer.contactNumber} - Name: ${customer.name} - Address: ${customer.address} - Ward: ${customer.wardName || 'None'} - Location: ${customer.locationName || 'None'}`);
     } else {
       // Create customer
       const customerRequest: AddCustomerRequestDto = {
@@ -230,7 +254,7 @@ const findAndCreateCustomer = async (order: Order) => {
       };
       customer = await createCustomer(customerRequest);
 
-      customer ? info(`✔️  [VNPOST] Phone: ${orderDetail.phone} - Name: ${orderDetail.fullName} - Address: ${orderDetail.address} => [KiotViet] Phone: ${customer.contactNumber} - Name: ${customer.name} - Address: ${customer.address} - Ward: ${customer.wardName || 'None'} - Location: ${customer.locationName || 'None'}`)
+      customer ? info(`✔️  [${from}] Phone: ${orderDetail.phone} - Name: ${orderDetail.fullName} - Address: ${orderDetail.address} => [KiotViet] Phone: ${customer.contactNumber} - Name: ${customer.name} - Address: ${customer.address} - Ward: ${customer.wardName || 'None'} - Location: ${customer.locationName || 'None'}`)
         : info('❌ Have the error when creating customer for this order!');
     }
   } catch (error) {
