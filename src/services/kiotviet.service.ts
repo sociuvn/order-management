@@ -6,6 +6,7 @@ import { KIOTVIET_DELIVERY_STATUS, KIOTVIET_INVOICE_STATUS } from '../config/con
 import { getVNPostOrder, getVNPostOrderDetail, getVNPostOrders } from './vnpost.service';
 import { Order } from '../dtos/order.dto';
 import { getGHNOrder, getGHNOrders } from './ghn.service';
+import { getViettelPostOrder, getViettelPostOrders } from './viettelpost.service';
 
 const printInvoiceByCode = async (code: string) => {
   try {
@@ -38,10 +39,11 @@ const syncInvoice = async (invoice: any, index = 0) => {
     if (
       partnerDelivery?.code !== kiotviet.partnerDelivery.GHTK &&
       partnerDelivery?.code !== kiotviet.partnerDelivery.GHN &&
-      partnerDelivery?.code !== kiotviet.partnerDelivery.VNPOST
+      partnerDelivery?.code !== kiotviet.partnerDelivery.VNPOST &&
+      partnerDelivery?.code !== kiotviet.partnerDelivery.VIETTELPOST
     ) {
       info(
-        `🙃 Skip data sync for invoice ${invoice.code} because delivery partner is not be GHTK, GHN, VNPOST!`
+        `🙃 Skip data sync for invoice ${invoice.code} because delivery partner is not be GHTK, GHN, VNPOST, VIETTELPOST!`
       );
       return;
     }
@@ -71,6 +73,15 @@ const syncInvoice = async (invoice: any, index = 0) => {
         invoice,
         getVNPostOrder,
         toVNPostDeliveryStatus
+      );
+    }
+
+    if (partnerDelivery?.code === kiotviet.partnerDelivery.VIETTELPOST) {
+      data = await syncInvoiceByDelivery(
+        index,
+        invoice,
+        getViettelPostOrder,
+        toViettelPostDeliveryStatus
       );
     }
 
@@ -152,6 +163,7 @@ const createCustomers = async (fromPurchaseDate: Date, toPurchaseDate: Date) => 
   try {
     await createVNPostCustomers(fromPurchaseDate, toPurchaseDate);
     await createGHNCustomers(fromPurchaseDate, toPurchaseDate);
+    await createViettelPostCustomers(fromPurchaseDate, toPurchaseDate);
     // TODO createGHTKCustomers(fromPurchaseDate, toPurchaseDate);
   } catch (error) {
     console.error(error.message);
@@ -166,6 +178,42 @@ const createVNPostCustomers = async (fromPurchaseDate: Date, toPurchaseDate: Dat
     for (let i = orders.length - 1; i >= 0; i--) {
       info(`-------------------- [VNPost Order: ${orders[i].code} (${orders[i].createdAt?.toLocaleDateString()})] --------------------`);
       await findAndCreateCustomer('VNPOST', orders[i]);
+    }
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+const createViettelPostCustomers = async (
+  fromPurchaseDate: Date,
+  toPurchaseDate: Date
+) => {
+  try {
+    const orders: Order[] = await getViettelPostOrders(
+      fromPurchaseDate.toLocaleDateString('vi-VN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }),
+      toPurchaseDate.toLocaleDateString('vi-VN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      })
+    );
+    info(
+      `🙌 Find ${
+        orders?.length
+      } ViettelPost orders from ${fromPurchaseDate.toLocaleDateString()} to ${toPurchaseDate.toLocaleDateString()}!`
+    );
+
+    for (let i = orders.length - 1; i >= 0; i--) {
+      info(
+        `-------------------- [ViettelPost Order: ${orders[i].code} (${orders[
+          i
+        ].createdAt?.toLocaleDateString()})] --------------------`
+      );
+      await findAndCreateCustomer('VIETTELPOST', orders[i]);
     }
   } catch (error) {
     console.error(error.message);
@@ -230,7 +278,7 @@ const createCustomer = async (customer: AddCustomerRequestDto): Promise<Customer
   }
 };
 
-const findAndCreateCustomer = async (from: 'VNPOST' | 'GHN' | 'GHTK', order: Order) => {
+const findAndCreateCustomer = async (from: 'VNPOST' | 'GHN' | 'GHTK' | 'VIETTELPOST', order: Order) => {
   try {
     let customer = await findCustomerByPhone(order.phone);
     let orderDetail: Order;
@@ -241,6 +289,8 @@ const findAndCreateCustomer = async (from: 'VNPOST' | 'GHN' | 'GHTK', order: Ord
       orderDetail = await getGHNOrder(order.code);
     } else if (from === 'GHTK') {
       // TODO: Add logic for GHTK
+    } else if (from === 'VIETTELPOST') {
+      orderDetail = await getViettelPostOrder(order.code);
     }
     if (customer) {
       info(`🔎 [${from}] Phone: ${orderDetail.phone} - Name: ${orderDetail.fullName} - Address: ${orderDetail.address} => [KiotViet] Phone: ${customer.contactNumber} - Name: ${customer.name} - Address: ${customer.address} - Ward: ${customer.wardName || 'None'} - Location: ${customer.locationName || 'None'}`);
@@ -294,6 +344,35 @@ const toVNPostDeliveryStatus = (vnpostOrderStatus: number): number => {
     case 120: // Đã trả tiền
       return KIOTVIET_DELIVERY_STATUS.COMPLETE;
     case 170: // Phát hoàn thành công
+      return KIOTVIET_DELIVERY_STATUS.RETURNNING;
+    default:
+      return KIOTVIET_DELIVERY_STATUS.PROCESSING;
+  }
+};
+
+const toViettelPostDeliveryStatus = (viettelpostOrderStatus: string): number => {
+  switch (Number(viettelpostOrderStatus)) {
+    case -100: // Tạo mới
+    case 100: // Đã tiếp nhận
+    case 103: // Đã tiếp nhận
+    case -108: // Đã tiếp nhận
+      return KIOTVIET_DELIVERY_STATUS.PROCESSING;
+    case 104: // Đang lấy hàng
+      return KIOTVIET_DELIVERY_STATUS.TAKING;
+    case 105: // Đã lấy hàng
+    case 200: // Đã lấy hàng
+    case 202: // Đang vận chuyển
+    case 300: // Đang vận chuyển
+    case 310: // Đang vận chuyển
+    case 320: // Đang vận chuyển
+    case 400: // Đang vận chuyển
+      return KIOTVIET_DELIVERY_STATUS.TAKEN;
+    case 500: // Đang giao hàng
+      return KIOTVIET_DELIVERY_STATUS.DELIVERING;
+    case 501: // Giao hàng thành công
+      return KIOTVIET_DELIVERY_STATUS.COMPLETE;
+    case 551: // Đang chuyển hoàn
+    case 504: // Đã trả
       return KIOTVIET_DELIVERY_STATUS.RETURNNING;
     default:
       return KIOTVIET_DELIVERY_STATUS.PROCESSING;

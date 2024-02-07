@@ -8,8 +8,10 @@ export const enum KIOTVIET_INVOICE_STATUS {
 }
 
 export const enum KIOTVIET_DELIVERY_STATUS {
-  TAKEN = 9,
-  RETURNNING = 4,
-  COMPLETE = 3,
-  PROCESSING = 1,
+  TAKEN = 9, // Đã lấy hàng
+  TAKING = 7, // Đang lấy hàng
+  RETURNNING = 4, // Đang chuyển hoàn
+  COMPLETE = 3, // Giao thành công
+  DELIVERING = 2, // Đang giao hàng
+  PROCESSING = 1, // Chờ xử lý
 }

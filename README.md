@@ -113,6 +113,34 @@ npm run cli -- vnpost get -f 2023-02-20 -t 2023-02-23
 npm run cli -- vnpost get -t 2023-02-26
 ```
 
+**ViettelPost:**
+
+- Token:
+
+```bash
+# Save token into .env
+npm run cli -- viettelpost token -s eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6xxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+- Orders:
+
+```bash
+# Get order by code
+npm run cli -- viettelpost get -c 1755979111111
+
+# Get orders by date
+npm run cli -- viettelpost get -d 2023-02-20
+
+# Get orders from the date to current date
+npm run cli -- viettelpost get -f 2023-02-20
+
+# Get orders from the date to other date
+npm run cli -- viettelpost get -f 2023-02-20 -t 2023-02-23
+
+# Get orders from current date to the date
+npm run cli -- viettelpost get -t 2023-02-26
+```
+
 #### Kiotviet
 
 - Token:
