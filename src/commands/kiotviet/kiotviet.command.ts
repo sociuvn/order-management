@@ -28,7 +28,7 @@ export const kiotvietCommand = (): Command => {
 
   customers
     .command('create')
-    .description('create kiotviet customers from ghtk, ghn vnpost order')
+    .description('create kiotviet customers from ghtk, ghn, vnpost, viettelpost order')
     .option('-d, --date <yyyy-MM-dd>', 'Purchase Date')
     .addOption(new Option('-f, --from <yyyy-MM-dd>', 'From Purchase Date').conflicts('date'))
     .addOption(new Option('-t, --to <yyyy-MM-dd>', 'To Purchase Date').conflicts('date'))
@@ -48,7 +48,7 @@ export const kiotvietCommand = (): Command => {
 
   invoices
     .command('sync')
-    .description('sync kiotviet invoice with ghtk, ghn, vnpost order')
+    .description('sync kiotviet invoice with ghtk, ghn, vnpost, viettelpost order')
     .option('-c, --code <value>', 'Kiotviet invoice code')
     .addOption(new Option('-d, --date <yyyy-MM-dd>', 'Purchase Date').conflicts('code'))
     .addOption(new Option('-f, --from <yyyy-MM-dd>', 'From Purchase Date').conflicts('code').conflicts('date'))

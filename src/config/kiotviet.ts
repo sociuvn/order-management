@@ -14,6 +14,7 @@ export const kiotviet = {
     GHTK: process.env.KIOTVIET_PARTNER_DELIVERY_CODE_GHTK,
     GHN: process.env.KIOTVIET_PARTNER_DELIVERY_CODE_GHN,
     VNPOST: process.env.KIOTVIET_PARTNER_DELIVERY_CODE_VNPOST,
+    VIETTELPOST: process.env.KIOTVIET_PARTNER_DELIVERY_CODE_VTPOST,
   },
   branch1: process.env.KIOTVIET_BRANCH1,
 };
