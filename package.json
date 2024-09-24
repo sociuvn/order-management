@@ -47,7 +47,7 @@
   "devDependencies": {
     "@types/body-parser": "1.19.5",
     "@types/bson": "4.2.0",
-    "@types/chai": "4.3.11",
+    "@types/chai": "4.3.20",
     "@types/compression": "1.7.5",
     "@types/concurrently": "7.0.0",
     "@types/errorhandler": "1.5.3",
